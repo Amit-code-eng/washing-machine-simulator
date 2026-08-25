@@ -1,60 +1,100 @@
 #include <stdio.h>
 #include "power.h"
 
-#define RED "\033[31m"
-#define GREEN "\033[32m"
-#define YELLOW "\033[33m"
-#define BLUE "\033[34m"
-#define MAGENTA "\033[35m"
-#define CYAN "\033[36m"
-
-#define RESET "\033[0m"
-
 /*
- * Handle power failure while the machine is RUNNING.
+ * Handle power failure.
  *
- * Requirements:
- * - Preserve the current remaining time.
- * - Preserve the unfinished cycle.
- * - Keep the door locked.
- * - Move the machine to POWER_FAILURE state.
+ * Only a RUNNING machine is affected.
+ *
+ * The following are preserved:
+ *
+ *     mode
+ *     remaining_time
+ *     detergent_present
+ *     start_requested
+ *
+ * The machine enters POWER_FAILURE and the door
+ * remains locked.
  */
 void power_failure(WashingMachine *machine)
 {
-    /* TODO: Implement power failure logic */
-    if (machine->state == RUNNING)
+    /*
+     * Power failure only interrupts an active wash.
+     */
+    if (machine->state != RUNNING)
     {
-        // machine->door_status = DOOR_LOCKED;
-        machine->state = POWER_FAILURE;
-        printf(YELLOW "Power Failure Detected.\nRemaining time preserved: %d minutes.\n" RESET, machine->remaining_time);
+        return;
     }
-    else
-    {
-        printf(CYAN "No Active Washing Cycle.\n" RESET);
-    }
+
+    /*
+     * DO NOT modify remaining_time.
+     *
+     * It represents the unfinished portion of the
+     * washing cycle.
+     */
+
+    /*
+     * Stop the timer logically.
+     *
+     * The timer thread itself remains alive, but
+     * timer_tick() will not execute because state
+     * is no longer RUNNING.
+     */
+    machine->timer_running = 0;
+
+    /*
+     * Preserve the current washing state by changing
+     * only the state to POWER_FAILURE.
+     */
+    machine->state = POWER_FAILURE;
+
+    /*
+     * Door remains locked during power failure.
+     */
+    machine->door_status = DOOR_LOCKED;
+
+    printf("\nPower failure detected.\n");
+    printf("Remaining time preserved: %d minutes.\n",
+           machine->remaining_time);
 }
 
 /*
- * Handle restoration of power.
+ * Restore power.
  *
- * Requirements:
- * - Power restoration is valid only from POWER_FAILURE.
- * - Resume the unfinished washing cycle.
- * - Preserve the remaining time.
- * - Keep the door locked.
- * - Return to RUNNING state.
+ * Only POWER_FAILURE can be restored.
+ *
+ * The preserved remaining_time is not modified.
  */
 void power_restore(WashingMachine *machine)
 {
-    /* TODO: Implement power restoration logic */
-    if (machine->state == POWER_FAILURE)
+    /*
+     * Restoration only matters if the machine is
+     * currently in POWER_FAILURE.
+     */
+    if (machine->state != POWER_FAILURE)
     {
-        machine->door_status = DOOR_CLOSED;
-        machine->state = RUNNING;
-        printf(GREEN "Power Restored.\nResuming Wash Cycle.\nRemaining Time: %d minutes.\n" RESET, machine->remaining_time);
+        return;
     }
-    else
-    {
-        printf(MAGENTA "Machine is Not in Power Failure State.\n" RESET);
-    }
+
+    /*
+     * Resume the unfinished washing cycle.
+     */
+    machine->state = RUNNING;
+
+    /*
+     * Door remains locked while washing resumes.
+     */
+    machine->door_status = DOOR_LOCKED;
+
+    /*
+     * Restart the timer thread's logical operation.
+     *
+     * remaining_time is intentionally untouched.
+     */
+    machine->timer_running = 1;
+
+    printf("\nPower restored.\n");
+    printf("Resuming washing cycle.\n");
+    printf("Remaining time: %d minutes.\n",
+           machine->remaining_time);
 }

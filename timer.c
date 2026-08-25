@@ -2,64 +2,133 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define GREEN "\033[32m"
-
-#define RESET "\033[0m"
-
 /*
- * Return the wash duration for the selected mode:
- * Heavy  -> 45 minutes
- * Normal -> 30 minutes
- * Light  -> 20 minutes
+ * Return the wash duration for the selected mode.
+ *
+ * Heavy  -> 45 simulated minutes
+ * Normal -> 30 simulated minutes
+ * Light  -> 20 simulated minutes
+ * None   -> 0
  */
 int get_mode_duration(WashMode mode)
 {
-    /* TODO: Implement mode duration logic */
+    switch (mode)
+    {
+    case MODE_HEAVY:
+        return 45;
 
-    return (mode == MODE_HEAVY) ? 45 : (mode == MODE_NORMAL) ? 30
-                                   : (mode == MODE_LIGHT)    ? 20
-                                                             : 0;
+    case MODE_NORMAL:
+        return 30;
+
+    case MODE_LIGHT:
+        return 20;
+
+    case MODE_NONE:
+    default:
+        return 0;
+    }
 }
 
 /*
- * Timer operates only while the machine is RUNNING.
+ * Decrement the washing timer by one simulated minute.
  *
- * Decrease the remaining time and handle completion
- * when the timer reaches zero.
+ * One call to timer_tick() represents one simulated minute.
+ *
+ * Timer only operates when the machine is RUNNING.
  */
 void timer_tick(WashingMachine *machine)
 {
-    /* TODO: Implement timer logic */
+    /*
+     * Do nothing unless the machine is actively washing.
+     */
     if (machine->state != RUNNING)
+    {
         return;
-
-    else if (machine->remaining_time)
-    {
-        machine->remaining_time--;
     }
-    else
+
+    /*
+     * Protect against invalid negative values.
+     */
+    if (machine->remaining_time <= 0)
     {
-        machine->state = IDLE;
-        printf(GREEN "\nWashing Cycle Completed.\n" RESET);
+        machine->remaining_time = 0;
+
+        /*
+         * Washing has finished.
+         */
+        machine->timer_running = 0;
+        machine->door_status = DOOR_OPEN;
+        machine->state = COMPLETED;
+
+        printf("\nWashing cycle completed.\n");
+
+        return;
+    }
+
+    /*
+     * Decrement one simulated minute.
+     */
+    machine->remaining_time--;
+
+    /*
+     * Timer reached zero.
+     */
+    if (machine->remaining_time == 0)
+    {
+        /*
+         * Stop washing.
+         */
+        machine->timer_running = 0;
+
+        /*
+         * Washing is complete.
+         */
+        machine->state = COMPLETED;
+
+        /*
+         * Door is unlocked after completion.
+         */
+        machine->door_status = DOOR_OPEN;
+
+        printf("\nWashing cycle completed.\n");
     }
 }
 
 /*
  * Background timer thread.
  *
- * One real second represents one simulated minute.
- * The timer should continue running independently
- * of user input.
+ * One real second = one simulated minute.
+ *
+ * The thread runs independently of the main user-input
+ * loop.
  */
 void *timer_thread(void *arg)
 {
-    /* TODO: Implement background timer logic */
     WashingMachine *machine = (WashingMachine *)arg;
 
     while (1)
     {
+        /*
+         * One real second represents one simulated minute.
+         */
         sleep(1);
-        timer_tick(machine);
+
+        /*
+         * Only tick while the timer is active.
+         *
+         * timer_running is cleared when:
+         *
+         * - cycle completes
+         * - cycle is aborted
+         *
+         * During POWER_FAILURE, timer_running remains
+         * inactive because the machine is not RUNNING.
+         */
+        if (machine->timer_running &&
+            machine->state == RUNNING)
+        {
+            timer_tick(machine);
+        }
     }
 
     return NULL;
