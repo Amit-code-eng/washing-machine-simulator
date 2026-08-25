@@ -32,7 +32,11 @@ void machine_select_mode(WashingMachine *machine, WashMode mode)
     /* TODO: Implement mode selection logic */
 
     if (machine->state != IDLE)
+    {
+        printf(MAGENTA "WASH MODE SELECTED .\n" RESET);
+
         return;
+    }
     machine->mode = mode;
     machine->timer_running = get_mode_duration(mode);
     printf(CYAN "WASH MODE SELECTED .\n" RESET);

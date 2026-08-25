@@ -33,13 +33,14 @@ void timer_tick(WashingMachine *machine)
     if (machine->state != RUNNING)
         return;
 
-    else if (machine->remaining_time)
+    else if (machine->remaining_time > 1)
     {
         machine->remaining_time--;
     }
     else
     {
         machine->state = IDLE;
+        machine->remaining_time = 0;
         printf(GREEN "\nWashing Cycle Completed.\n" RESET);
     }
 }
