@@ -2,10 +2,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define GREEN "\033[32m"
-
-#define RESET "\033[0m"
-
 /*
  * Return the wash duration for the selected mode:
  * Heavy  -> 45 minutes
@@ -15,11 +11,8 @@
 int get_mode_duration(WashMode mode)
 {
     /* TODO: Implement mode duration logic */
-
-    return (mode == MODE_HEAVY) ? 45 : (mode == MODE_NORMAL) ? 30
-                                   : (mode == MODE_LIGHT)    ? 20
-                                                             : 0;
 }
+
 
 /*
  * Timer operates only while the machine is RUNNING.
@@ -30,19 +23,8 @@ int get_mode_duration(WashMode mode)
 void timer_tick(WashingMachine *machine)
 {
     /* TODO: Implement timer logic */
-    if (machine->state != RUNNING)
-        return;
-
-    else if (machine->remaining_time)
-    {
-        machine->remaining_time--;
-    }
-    else
-    {
-        machine->state = IDLE;
-        printf(GREEN "\nWashing Cycle Completed.\n" RESET);
-    }
 }
+
 
 /*
  * Background timer thread.
@@ -54,13 +36,4 @@ void timer_tick(WashingMachine *machine)
 void *timer_thread(void *arg)
 {
     /* TODO: Implement background timer logic */
-    WashingMachine *machine = (WashingMachine *)arg;
-
-    while (1)
-    {
-        sleep(1);
-        timer_tick(machine);
-    }
-
-    return NULL;
 }
