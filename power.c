@@ -26,6 +26,7 @@ void power_failure(WashingMachine *machine)
     {
         // machine->door_status = DOOR_LOCKED;
         machine->state = POWER_FAILURE;
+        machine->timer_running=0;
         printf(YELLOW "Power Failure Detected.\nRemaining time preserved: %d minutes.\n" RESET, machine->remaining_time);
     }
     else
@@ -50,6 +51,7 @@ void power_restore(WashingMachine *machine)
     if (machine->state == POWER_FAILURE)
     {
         machine->door_status = DOOR_CLOSED;
+        machine->timer_running=1;
         machine->state = RUNNING;
         printf(GREEN "Power Restored.\nResuming Wash Cycle.\nRemaining Time: %d minutes.\n" RESET, machine->remaining_time);
     }

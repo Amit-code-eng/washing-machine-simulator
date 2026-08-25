@@ -31,10 +31,17 @@ void machine_select_mode(WashingMachine *machine, WashMode mode)
 {
     /* TODO: Implement mode selection logic */
 
-    if (machine->state != IDLE)
+    if (((machine->state == RUNNING) ||
+         (machine->state == POWER_FAILURE)))
+    {
+        printf(MAGENTA "WASH MODE CANNOT BE SELECTED .\n" RESET);
+
         return;
+    }
     machine->mode = mode;
-    machine->timer_running = get_mode_duration(mode);
+    machine->state = IDLE;
+    machine->remaining_time = 0;
+    machine->timer_running = 0;
     printf(CYAN "WASH MODE SELECTED .\n" RESET);
 }
 
@@ -51,7 +58,7 @@ void machine_start(WashingMachine *machine)
 {
     /* TODO: Implement start logic */
 
-    if (machine->state != IDLE)
+    if ((machine->state != IDLE) && (machine->state != WAITING_FOR_DETERGENT) && (machine->state != COMPLETED) && (machine->state != ABORTED))
     {
         printf(RED "Machine is Not Ready to Start.\n" RESET);
         return;
@@ -77,9 +84,10 @@ void machine_start(WashingMachine *machine)
         return;
     }
 
-    machine->state = RUNNING;
-    machine->remaining_time = machine->timer_running;
+    machine->remaining_time = get_mode_duration(machine->mode);
     machine->door_status = DOOR_LOCKED;
+    machine->timer_running = 1;
+    machine->state = RUNNING;
     printf(GREEN "Washing Maching is Running.\n" RESET);
 }
 
@@ -96,8 +104,10 @@ void machine_abort(WashingMachine *machine)
         return;
     }
 
-    machine->state = IDLE;
-    machine->remaining_time = 0;
+    machine->state = ABORTED;
+    machine->timer_running = 0;
+    machine->start_requested = 0;
+    machine->mode = MODE_NONE;
     machine->door_status = DOOR_CLOSED;
 
     printf(MAGENTA "Washing Cycle Aborted.\n" RESET);
@@ -117,6 +127,10 @@ void machine_open_door(WashingMachine *machine)
     }
 
     machine->door_status = DOOR_OPEN;
+    machine->remaining_time = 0;
+    machine->timer_running = 0;
+    machine->state = IDLE;
+    machine->start_requested = 0;
     printf(CYAN "Door Opended.\n" RESET);
 }
 
@@ -150,7 +164,6 @@ void machine_fill_detergent(WashingMachine *machine)
     if (machine->start_requested)
     {
         machine->start_requested = 0;
-        machine->state = IDLE;
 
         machine_start(machine);
         return;
