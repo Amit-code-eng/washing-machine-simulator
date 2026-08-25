@@ -16,9 +16,10 @@ int get_mode_duration(WashMode mode)
 {
     /* TODO: Implement mode duration logic */
 
-    return (mode == MODE_HEAVY) ? 45 : (mode == MODE_NORMAL) ? 30
-                                   : (mode == MODE_LIGHT)    ? 20
-                                                             : 0;
+    return (mode == MODE_HEAVY)    ? 45
+           : (mode == MODE_NORMAL) ? 30
+           : (mode == MODE_LIGHT)  ? 20
+                                   : 0;
 }
 
 /*
@@ -30,6 +31,7 @@ int get_mode_duration(WashMode mode)
 void timer_tick(WashingMachine *machine)
 {
     /* TODO: Implement timer logic */
+
     if (machine->state != RUNNING)
         return;
 
@@ -41,7 +43,10 @@ void timer_tick(WashingMachine *machine)
     {
         machine->state = IDLE;
         machine->remaining_time = 0;
-        printf(GREEN "\nWashing Cycle Completed.\n" RESET);
+        machine->door_status = DOOR_CLOSED;
+        machine->detergent_present = 0;
+
+        printf(GREEN "\nWASHING CYCLE COMPLETED.\n" RESET);
     }
 }
 
@@ -55,6 +60,7 @@ void timer_tick(WashingMachine *machine)
 void *timer_thread(void *arg)
 {
     /* TODO: Implement background timer logic */
+
     WashingMachine *machine = (WashingMachine *)arg;
 
     while (1)

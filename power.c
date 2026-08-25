@@ -22,15 +22,21 @@
 void power_failure(WashingMachine *machine)
 {
     /* TODO: Implement power failure logic */
+
     if (machine->state == RUNNING)
     {
         // machine->door_status = DOOR_LOCKED;
+
         machine->state = POWER_FAILURE;
-        printf(YELLOW "Power Failure Detected.\nRemaining time preserved: %d minutes.\n" RESET, machine->remaining_time);
+
+        printf(YELLOW
+               "POWER FAILURE DETECTED.\n"
+               "REMAINING TIME PRESERVED: %d MINUTES.\n" RESET,
+               machine->remaining_time);
     }
     else
     {
-        printf(CYAN "No Active Washing Cycle.\n" RESET);
+        printf(CYAN "NO ACTIVE WASHING CYCLE.\n" RESET);
     }
 }
 
@@ -47,14 +53,21 @@ void power_failure(WashingMachine *machine)
 void power_restore(WashingMachine *machine)
 {
     /* TODO: Implement power restoration logic */
+
     if (machine->state == POWER_FAILURE)
     {
         machine->door_status = DOOR_CLOSED;
         machine->state = RUNNING;
-        printf(GREEN "Power Restored.\nResuming Wash Cycle.\nRemaining Time: %d minutes.\n" RESET, machine->remaining_time);
+
+        printf(GREEN
+               "POWER RESTORED.\n"
+               "RESUMING WASH CYCLE.\n"
+               "REMAINING TIME: %d MINUTES.\n" RESET,
+               machine->remaining_time);
     }
     else
     {
-        printf(MAGENTA "Machine is Not in Power Failure State.\n" RESET);
+        printf(MAGENTA
+               "MACHINE IS NOT IN POWER FAILURE STATE.\n" RESET);
     }
 }
