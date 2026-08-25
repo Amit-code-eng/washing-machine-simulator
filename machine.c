@@ -31,18 +31,19 @@ void machine_select_mode(WashingMachine *machine, WashMode mode)
 {
     /* TODO: Implement mode selection logic */
 
-    if (((machine->state == RUNNING) ||
-         (machine->state == POWER_FAILURE)))
+    if ((machine->state == RUNNING) ||
+        (machine->state == POWER_FAILURE))
     {
-        printf(MAGENTA "WASH MODE CANNOT BE SELECTED .\n" RESET);
-
+        printf(MAGENTA "WASH MODE CANNOT BE SELECTED.\n" RESET);
         return;
     }
+
     machine->mode = mode;
     machine->state = IDLE;
     machine->remaining_time = 0;
     machine->timer_running = 0;
-    printf(CYAN "WASH MODE SELECTED .\n" RESET);
+
+    printf(CYAN "WASH MODE SELECTED.\n" RESET);
 }
 
 /*
@@ -58,21 +59,24 @@ void machine_start(WashingMachine *machine)
 {
     /* TODO: Implement start logic */
 
-    if ((machine->state != IDLE) && (machine->state != WAITING_FOR_DETERGENT) && (machine->state != COMPLETED) && (machine->state != ABORTED))
+    if ((machine->state != IDLE) &&
+        (machine->state != WAITING_FOR_DETERGENT) &&
+        (machine->state != COMPLETED) &&
+        (machine->state != ABORTED))
     {
-        printf(RED "Machine is Not Ready to Start.\n" RESET);
+        printf(RED "MACHINE IS NOT READY TO START.\n" RESET);
         return;
     }
 
     if (machine->mode == MODE_NONE)
     {
-        printf(RED "Invalide Mode Selected.\n" RESET);
+        printf(RED "INVALID MODE SELECTED.\n" RESET);
         return;
     }
 
     if (machine->door_status == DOOR_OPEN)
     {
-        printf(RED "Door is Not CLosed.\n" RESET);
+        printf(RED "DOOR IS NOT CLOSED.\n" RESET);
         return;
     }
 
@@ -80,7 +84,8 @@ void machine_start(WashingMachine *machine)
     {
         machine->start_requested = 1;
         machine->state = WAITING_FOR_DETERGENT;
-        printf(RED "Detergent is Empty.\n" RESET);
+
+        printf(RED "DETERGENT IS EMPTY.\n" RESET);
         return;
     }
 
@@ -88,7 +93,8 @@ void machine_start(WashingMachine *machine)
     machine->door_status = DOOR_LOCKED;
     machine->timer_running = 1;
     machine->state = RUNNING;
-    printf(GREEN "Washing Maching is Running.\n" RESET);
+
+    printf(GREEN "WASHING MACHINE IS RUNNING.\n" RESET);
 }
 
 /*
@@ -98,9 +104,10 @@ void machine_start(WashingMachine *machine)
 void machine_abort(WashingMachine *machine)
 {
     /* TODO: Implement abort logic */
+
     if (machine->state != RUNNING)
     {
-        printf(YELLOW "No Washing Cycle is Currently Running.\n" RESET);
+        printf(YELLOW "NO WASHING CYCLE IS CURRENTLY RUNNING.\n" RESET);
         return;
     }
 
@@ -110,7 +117,7 @@ void machine_abort(WashingMachine *machine)
     machine->mode = MODE_NONE;
     machine->door_status = DOOR_CLOSED;
 
-    printf(MAGENTA "Washing Cycle Aborted.\n" RESET);
+    printf(MAGENTA "WASHING CYCLE ABORTED.\n" RESET);
 }
 
 /*
@@ -120,9 +127,10 @@ void machine_abort(WashingMachine *machine)
 void machine_open_door(WashingMachine *machine)
 {
     /* TODO: Implement door opening logic */
+
     if (machine->door_status == DOOR_LOCKED)
     {
-        printf(MAGENTA "Door is Locked and Cannot be Opened.\n" RESET);
+        printf(MAGENTA "DOOR IS LOCKED AND CANNOT BE OPENED.\n" RESET);
         return;
     }
 
@@ -131,23 +139,26 @@ void machine_open_door(WashingMachine *machine)
     machine->timer_running = 0;
     machine->state = IDLE;
     machine->start_requested = 0;
-    printf(CYAN "Door Opended.\n" RESET);
+
+    printf(CYAN "DOOR OPENED.\n" RESET);
 }
 
 /*
  * Close the door.
  */
-
 void machine_close_door(WashingMachine *machine)
 {
     /* TODO: Implement door closing logic */
+
     if (machine->door_status == DOOR_LOCKED)
     {
-        printf(YELLOW "Door is Already Locked.\n" RESET);
+        printf(YELLOW "DOOR IS ALREADY LOCKED.\n" RESET);
         return;
     }
+
     machine->door_status = DOOR_CLOSED;
-    printf(BLUE "Door Closed.\n" RESET);
+
+    printf(BLUE "DOOR CLOSED.\n" RESET);
 }
 
 /*
@@ -158,8 +169,10 @@ void machine_close_door(WashingMachine *machine)
 void machine_fill_detergent(WashingMachine *machine)
 {
     /* TODO: Implement detergent logic */
+
     machine->detergent_present = 1;
-    printf(CYAN "Detergent Filled.\n" RESET);
+
+    printf(CYAN "DETERGENT FILLED.\n" RESET);
 
     if (machine->start_requested)
     {
